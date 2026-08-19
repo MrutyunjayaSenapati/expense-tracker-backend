@@ -117,3 +117,54 @@ class ReportService:
             accounts=accounts,
             trend=trend,
         )
+
+    async def export_csv(self, user_id: uuid.UUID) -> str:
+        import csv
+        import io
+        from sqlalchemy.orm import selectinload
+
+        txns_result = await self.db.execute(
+            select(Transaction)
+            .options(
+                selectinload(Transaction.category),
+                selectinload(Transaction.account),
+            )
+            .where(Transaction.user_id == user_id)
+            .order_by(Transaction.transaction_date.desc())
+        )
+        txns = txns_result.scalars().all()
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow([
+            "Transaction ID",
+            "Date",
+            "Time (UTC)",
+            "Type",
+            "Category",
+            "Account",
+            "Amount",
+            "Merchant",
+            "Note",
+        ])
+
+        for t in txns:
+            dt = t.transaction_date
+            d_str = dt.strftime("%Y-%m-%d") if dt else ""
+            t_str = dt.strftime("%H:%M:%S") if dt else ""
+            cat_name = t.category.name if t.category else "Uncategorized"
+            acc_name = t.account.name if t.account else "Default Account"
+            writer.writerow([
+                str(t.id),
+                d_str,
+                t_str,
+                t.type,
+                cat_name,
+                acc_name,
+                f"{t.amount:.2f}",
+                t.merchant or "",
+                t.note or "",
+            ])
+
+        return output.getvalue()
+

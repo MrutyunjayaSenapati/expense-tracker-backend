@@ -81,3 +81,56 @@ async def test_register_and_login_flow(client: AsyncClient):
         json={"refresh_token": refresh_token},
     )
     assert ref_fail.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_google_login_flow(client: AsyncClient, monkeypatch):
+    from unittest.mock import AsyncMock, MagicMock
+    import httpx
+
+    # Mock httpx response from Google TokenInfo
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {
+        "email": "googleuser@example.com",
+        "name": "Google User",
+        "picture": "https://example.com/photo.jpg",
+        "sub": "google-oauth-12345",
+    }
+
+    mock_client_instance = MagicMock()
+    mock_client_instance.get = AsyncMock(return_value=mock_resp)
+    mock_client_instance.__aenter__ = AsyncMock(return_value=mock_client_instance)
+    mock_client_instance.__aexit__ = AsyncMock(return_value=None)
+
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: mock_client_instance)
+
+    # 1. First Google Login (Registration)
+    res = await client.post(
+        "/api/v1/auth/google",
+        json={"id_token": "valid_fake_google_token"},
+    )
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert "access_token" in data
+    assert "refresh_token" in data
+    assert data["user"]["email"] == "googleuser@example.com"
+    assert data["user"]["name"] == "Google User"
+    assert data["user"]["avatar_url"] == "https://example.com/photo.jpg"
+    assert data["user"]["auth_provider"] == "google"
+
+    # 2. Subsequent Google Login (Existing User)
+    res2 = await client.post(
+        "/api/v1/auth/google",
+        json={"id_token": "valid_fake_google_token"},
+    )
+    assert res2.status_code == 200
+    data2 = res2.json()
+    assert data2["user"]["id"] == data["user"]["id"]
+
+    # 3. Google Login with no tokens fails
+    res_err = await client.post(
+        "/api/v1/auth/google",
+        json={},
+    )
+    assert res_err.status_code == 401

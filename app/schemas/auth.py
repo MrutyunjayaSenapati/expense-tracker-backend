@@ -40,6 +40,15 @@ class UserResponse(BaseModel):
     id: uuid.UUID
     name: str
     email: str
+    avatar_url: Optional[str] = None
+    auth_provider: Optional[str] = "email"
+
+
+class GoogleLoginRequest(BaseModel):
+    id_token: Optional[str] = None
+    access_token: Optional[str] = None
+    code: Optional[str] = None
+    redirect_uri: Optional[str] = None
 
 
 class RegisterResponse(BaseModel):

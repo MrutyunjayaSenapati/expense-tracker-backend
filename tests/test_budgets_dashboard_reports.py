@@ -84,3 +84,11 @@ async def test_budgets_dashboard_and_reports(client: AsyncClient):
     # FIRST_TRANSACTION achievement should be unlocked
     unlocked_codes = [a["code"] for a in gam["achievements"] if a["unlocked"]]
     assert "FIRST_TRANSACTION" in unlocked_codes
+
+    # 7. Check CSV Export
+    csv_res = await client.get("/api/v1/reports/export/csv", headers=headers)
+    assert csv_res.status_code == 200
+    assert "text/csv" in csv_res.headers.get("content-type", "")
+    assert "Supermarket" in csv_res.text
+    assert "2500.00" in csv_res.text
+
