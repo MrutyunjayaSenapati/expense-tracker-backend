@@ -9,6 +9,8 @@ from app.db.models.recurring_transaction import RecurringTransaction
 from app.db.models.notification import Notification
 from app.db.models.streak import UserStreak
 from app.db.models.achievement import Achievement, UserAchievement
+from app.db.models.split import SplitBill, SplitParticipant
+from app.db.models.group import Group, GroupMember, GroupExpense, GroupExpenseSplit, GroupSettlement
 
 __all__ = [
     "Base",
@@ -26,4 +28,11 @@ __all__ = [
     "UserStreak",
     "Achievement",
     "UserAchievement",
+    "SplitBill",
+    "SplitParticipant",
+    "Group",
+    "GroupMember",
+    "GroupExpense",
+    "GroupExpenseSplit",
+    "GroupSettlement",
 ]
