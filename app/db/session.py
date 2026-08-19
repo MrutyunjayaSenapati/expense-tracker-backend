@@ -12,11 +12,17 @@ elif db_url.startswith("postgresql://"):
 connect_args = {}
 if db_url.startswith("sqlite"):
     connect_args["check_same_thread"] = False
+elif "asyncpg" in db_url:
+    # Disable prepared statement caching for full compatibility with PgBouncer / Supabase / Neon / Render transaction poolers
+    connect_args["statement_cache_size"] = 0
+    connect_args["prepared_statement_cache_size"] = 0
 
 engine = create_async_engine(
     db_url,
     echo=False,
     future=True,
+    pool_pre_ping=True,
+    pool_recycle=300,
     connect_args=connect_args,
 )
 
