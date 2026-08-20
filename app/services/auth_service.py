@@ -191,10 +191,10 @@ class AuthService:
                     token_resp = await client.post(
                         "https://oauth2.googleapis.com/token",
                         data={
-                            "client_id": settings.GOOGLE_CLIENT_ID,
+                            "client_id": settings.GOOGLE_CLIENT_ID or "1034897317741-hacdelsguobptpkjmp3fujjk2k2guhfu.apps.googleusercontent.com",
                             "code": payload.code,
                             "grant_type": "authorization_code",
-                            "redirect_uri": payload.redirect_uri or "https://auth.expo.io/@mrnobody007/expense-tracker",
+                            "redirect_uri": payload.redirect_uri or "https://expense-tracker-backend-9bdd.onrender.com/api/v1/auth/google/callback",
                         },
                     )
                     if token_resp.status_code == 200:
