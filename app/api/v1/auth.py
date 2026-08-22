@@ -204,7 +204,7 @@ async def google_callback(
             if (hash) {{
                 const urlParams = new URLSearchParams(window.location.search);
                 const state = urlParams.get('state') || "{return_url}";
-                target = state + (state.includes('#') ? '&' : '#') + hash;
+                target = state + (state.includes('?') ? '&' : '?') + hash;
             }}
 
             const btn = document.getElementById('redirectBtn');
