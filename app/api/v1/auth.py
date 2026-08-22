@@ -1,5 +1,6 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.db.models.user import User
@@ -109,14 +110,13 @@ async def google_callback(
             traceback.print_exc()
 
     if tokens_query:
-        if "#" in return_url:
-            redirect_target = f"{return_url}&{tokens_query}"
-        else:
-            redirect_target = f"{return_url}#{tokens_query}"
+        delimiter = "&" if ("?" in return_url or "#" in return_url) else "?"
+        redirect_target = f"{return_url}{delimiter}{tokens_query}"
     else:
         redirect_target = return_url
 
-    html = f"""<!DOCTYPE html>
+    # Instant HTTP 307 redirect closes Chrome CustomTabs and returns directly to React Native app
+    return RedirectResponse(url=redirect_target, status_code=307)
 <html>
 <head>
     <meta charset="utf-8">
