@@ -112,6 +112,9 @@ async def google_callback(
     if tokens_query:
         delimiter = "&" if ("?" in return_url or "#" in return_url) else "?"
         redirect_target = f"{return_url}{delimiter}{tokens_query}"
+    elif code:
+        delimiter = "&" if ("?" in return_url or "#" in return_url) else "?"
+        redirect_target = f"{return_url}{delimiter}code={code}"
     else:
         redirect_target = return_url
 
