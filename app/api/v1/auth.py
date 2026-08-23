@@ -90,7 +90,10 @@ async def google_callback(
     # If code or id_token arrived in query params, attempt server-side verification
     if code or id_token or access_token:
         try:
-            callback_uri = str(request.url).split("?")[0]
+            proto = request.headers.get("x-forwarded-proto", request.url.scheme)
+            callback_uri = f"{proto}://{request.url.netloc}{request.url.path}"
+            if "onrender.com" in callback_uri and callback_uri.startswith("http://"):
+                callback_uri = callback_uri.replace("http://", "https://", 1)
             service = AuthService(db)
             req = GoogleLoginRequest(
                 code=code,
