@@ -201,8 +201,10 @@ class AuthService:
                         tdata = token_resp.json()
                         id_token = id_token or tdata.get("id_token")
                         access_token = access_token or tdata.get("access_token")
-                except Exception:
-                    pass
+                    else:
+                        print(f"⚠️ [Google Token Exchange Failed] Status: {token_resp.status_code}, Body: {token_resp.text}")
+                except Exception as ex:
+                    print(f"⚠️ [Google Token Exchange Exception]: {ex}")
 
             # 2. Try verifying with Google ID token
             if id_token:
