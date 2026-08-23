@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
     GOOGLE_CLIENT_ID: str = "1034897317741-hacdelsguobptpkjmp3fujjk2k2guhfu.apps.googleusercontent.com"
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
 
     # CORS
     CORS_ORIGINS: List[str] = [

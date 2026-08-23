@@ -192,14 +192,18 @@ class AuthService:
                     if "onrender.com" in r_uri and r_uri.startswith("http://"):
                         r_uri = r_uri.replace("http://", "https://", 1)
 
+                    data = {
+                        "client_id": settings.GOOGLE_CLIENT_ID or "1034897317741-hacdelsguobptpkjmp3fujjk2k2guhfu.apps.googleusercontent.com",
+                        "code": payload.code,
+                        "grant_type": "authorization_code",
+                        "redirect_uri": r_uri,
+                    }
+                    if settings.GOOGLE_CLIENT_SECRET:
+                        data["client_secret"] = settings.GOOGLE_CLIENT_SECRET
+
                     token_resp = await client.post(
                         "https://oauth2.googleapis.com/token",
-                        data={
-                            "client_id": settings.GOOGLE_CLIENT_ID or "1034897317741-hacdelsguobptpkjmp3fujjk2k2guhfu.apps.googleusercontent.com",
-                            "code": payload.code,
-                            "grant_type": "authorization_code",
-                            "redirect_uri": r_uri,
-                        },
+                        data=data,
                     )
                     if token_resp.status_code == 200:
                         tdata = token_resp.json()
