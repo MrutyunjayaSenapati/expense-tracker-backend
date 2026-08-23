@@ -118,8 +118,7 @@ async def google_callback(
     else:
         redirect_target = return_url
 
-    # Instant HTTP 307 redirect closes Chrome CustomTabs and returns directly to React Native app
-    return RedirectResponse(url=redirect_target, status_code=307)
+    html = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
