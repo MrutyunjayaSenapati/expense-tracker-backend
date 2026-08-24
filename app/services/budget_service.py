@@ -190,3 +190,31 @@ class BudgetService:
             status=status_str,
             categories=category_responses,
         )
+
+    async def check_and_send_budget_alert(self, user_id: uuid.UUID, category_id: uuid.UUID) -> None:
+        """Check budget status for a user and send push notification if thresholds crossed."""
+        budgets = await self.budget_repo.get_all_by_user(user_id=user_id, active_only=True)
+        if not budgets:
+            return
+
+        from app.services.push_notification_service import PushNotificationService
+        push_service = PushNotificationService(self.db)
+
+        for budget in budgets:
+            enriched = await self._enrich_budget(budget)
+            if enriched.percentage_used >= 80:
+                is_over = enriched.percentage_used >= 100
+                title = f"Over Budget: {budget.name}" if is_over else f"Budget Alert: {budget.name}"
+                body = (
+                    f"You've spent ₹{enriched.spent:,.2f} of ₹{enriched.amount:,.2f} limit ({enriched.percentage_used:.1f}%)."
+                    if is_over
+                    else f"You've reached {enriched.percentage_used:.1f}% of your ₹{enriched.amount:,.2f} budget."
+                )
+                await push_service.send_to_user(
+                    user_id=user_id,
+                    title=title,
+                    body=body,
+                    data={"screen": "/(tabs)/reports"},
+                    channel_id="budget-alerts",
+                )
+                break

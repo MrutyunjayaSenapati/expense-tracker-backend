@@ -100,6 +100,12 @@ class TransactionService:
         # Update streak and gamification
         await self.gamification_service.record_transaction_activity(user_id, txn_date.date())
 
+        # Check budget limit alerts if expense
+        if payload.type == "EXPENSE":
+            from app.services.budget_service import BudgetService
+            budget_service = BudgetService(self.db)
+            await budget_service.check_and_send_budget_alert(user_id, payload.category_id)
+
         await self.db.commit()
 
         # Reload with joined account & category

@@ -47,6 +47,7 @@ from app.schemas.report import (
     ReportTrendItem,
 )
 from app.schemas.notification import NotificationListResponse, NotificationResponse
+from app.schemas.push_token import PushTokenRegister, PushTokenResponse, PushTokenUnregister
 from app.schemas.gamification import AchievementResponse, GamificationResponse
 
 __all__ = [
@@ -98,6 +99,9 @@ __all__ = [
     "ReportTrendItem",
     "NotificationResponse",
     "NotificationListResponse",
+    "PushTokenRegister",
+    "PushTokenUnregister",
+    "PushTokenResponse",
     "AchievementResponse",
     "GamificationResponse",
 ]

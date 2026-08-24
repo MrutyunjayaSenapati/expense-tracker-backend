@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from app.db.models.budget import Budget
     from app.db.models.recurring_transaction import RecurringTransaction
     from app.db.models.notification import Notification
+    from app.db.models.push_token import UserPushToken
     from app.db.models.streak import UserStreak
     from app.db.models.achievement import UserAchievement
     from app.db.models.refresh_token import RefreshToken
@@ -40,5 +41,6 @@ class User(Base, TimestampMixin):
     budgets: Mapped[List["Budget"]] = relationship("Budget", back_populates="user", cascade="all, delete-orphan")
     recurring_transactions: Mapped[List["RecurringTransaction"]] = relationship("RecurringTransaction", back_populates="user", cascade="all, delete-orphan")
     notifications: Mapped[List["Notification"]] = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
+    push_tokens: Mapped[List["UserPushToken"]] = relationship("UserPushToken", back_populates="user", cascade="all, delete-orphan")
     streak: Mapped["UserStreak"] = relationship("UserStreak", back_populates="user", uselist=False, cascade="all, delete-orphan")
     achievements: Mapped[List["UserAchievement"]] = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")

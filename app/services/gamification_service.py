@@ -9,6 +9,7 @@ from app.db.models.transaction import Transaction
 from app.repositories.gamification_repository import GamificationRepository
 from app.schemas.gamification import AchievementResponse, GamificationResponse
 from app.schemas.dashboard import StreakSummary
+from app.services.push_notification_service import PushNotificationService
 
 
 class GamificationService:
@@ -94,13 +95,23 @@ class GamificationService:
 
     async def _unlock(self, user_id: uuid.UUID, achievement_id: uuid.UUID, achievement_name: str) -> None:
         await self.repo.unlock_achievement(user_id, achievement_id)
+        title = "Achievement Unlocked! 🏆"
+        message = f"You unlocked '{achievement_name}'!"
         # Create notification
         notif = Notification(
             user_id=user_id,
             type="ACHIEVEMENT_UNLOCKED",
-            title="Achievement Unlocked! 🏆",
-            message=f"You unlocked '{achievement_name}'!",
+            title=title,
+            message=message,
             created_at=datetime.now(timezone.utc),
         )
         self.db.add(notif)
         await self.db.flush()
+
+        push_service = PushNotificationService(self.db)
+        await push_service.send_to_user(
+            user_id=user_id,
+            title=title,
+            body=message,
+            data={"screen": "/(tabs)/dashboard"},
+        )

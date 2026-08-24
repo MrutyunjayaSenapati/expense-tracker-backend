@@ -10,6 +10,7 @@ from app.repositories.account_repository import AccountRepository
 from app.repositories.category_repository import CategoryRepository
 from app.repositories.recurring_repository import RecurringTransactionRepository
 from app.schemas.recurring import RecurringTransactionCreate, RecurringTransactionUpdate
+from app.services.push_notification_service import PushNotificationService
 
 
 def _get_next_monthly_date(current_date: date) -> date:
@@ -158,15 +159,26 @@ class RecurringTransactionService:
                 item.is_active = False
 
             # 4. Notify user
+            notif_title = "Recurring Transaction Processed"
+            notif_message = f"Processed recurring {item.type.lower()} of ₹{item.amount:.2f}"
             notif = Notification(
                 user_id=item.user_id,
                 type="RECURRING_TRANSACTION",
-                title="Recurring Transaction Processed",
-                message=f"Processed recurring {item.type.lower()} of ₹{item.amount:.2f}",
+                title=notif_title,
+                message=notif_message,
                 created_at=datetime.now(timezone.utc),
             )
             self.db.add(notif)
             processed_count += 1
+
+            # 5. Dispatch remote push notification
+            push_service = PushNotificationService(self.db)
+            await push_service.send_to_user(
+                user_id=item.user_id,
+                title=notif_title,
+                body=notif_message,
+                data={"screen": "/(tabs)/add"},
+            )
 
         if processed_count > 0:
             await self.db.commit()

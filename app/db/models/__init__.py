@@ -7,6 +7,7 @@ from app.db.models.transaction import Transaction
 from app.db.models.budget import Budget, BudgetCategory
 from app.db.models.recurring_transaction import RecurringTransaction
 from app.db.models.notification import Notification
+from app.db.models.push_token import UserPushToken
 from app.db.models.streak import UserStreak
 from app.db.models.achievement import Achievement, UserAchievement
 from app.db.models.split import SplitBill, SplitParticipant
@@ -25,6 +26,7 @@ __all__ = [
     "BudgetCategory",
     "RecurringTransaction",
     "Notification",
+    "UserPushToken",
     "UserStreak",
     "Achievement",
     "UserAchievement",
