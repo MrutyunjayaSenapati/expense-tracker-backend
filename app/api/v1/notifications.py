@@ -96,12 +96,24 @@ async def broadcast_push_notification(
 ):
     from app.services.push_notification_service import PushNotificationService
     push_service = PushNotificationService(db)
-    success = await push_service.broadcast_to_all(
+    success, count = await push_service.broadcast_to_all(
         title=payload.title,
         body=payload.body,
         data=payload.data,
     )
-    return {"status": "ok", "sent": success}
+    if count == 0:
+        return {
+            "status": "ok",
+            "tokens_found": 0,
+            "sent": False,
+            "message": "No active device push tokens found in database. Users must log into the mobile app to register their push token."
+        }
+    return {
+        "status": "ok",
+        "tokens_found": count,
+        "sent": success,
+        "message": f"Successfully dispatched push notification to {count} device(s)."
+    }
 
 
 @router.patch(

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 import uuid
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -79,12 +79,13 @@ class PushNotificationService:
         body: str,
         data: Optional[Dict[str, Any]] = None,
         sound: str = "default",
-    ) -> bool:
+    ) -> Tuple[bool, int]:
         """Broadcast push notification to ALL active registered devices."""
         tokens = await self.repo.get_all_active_tokens()
+        token_count = len(tokens)
         if not tokens:
             logger.info("No active push tokens found for broadcast.")
-            return False
+            return False, 0
 
         messages = []
         for t in tokens:
@@ -98,7 +99,8 @@ class PushNotificationService:
                 msg["data"] = data
             messages.append(msg)
 
-        return await self._dispatch_to_expo(messages)
+        success = await self._dispatch_to_expo(messages)
+        return success, token_count
 
     async def _dispatch_to_expo(self, messages: List[Dict[str, Any]]) -> bool:
         if not messages:
