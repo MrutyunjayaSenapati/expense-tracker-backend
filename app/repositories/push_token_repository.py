@@ -63,3 +63,9 @@ class PushTokenRepository(BaseRepository[UserPushToken]):
             )
         )
         return list(result.scalars().all())
+
+    async def get_all_active_tokens(self) -> List[UserPushToken]:
+        result = await self.db.execute(
+            select(UserPushToken).where(UserPushToken.is_active == True)
+        )
+        return list(result.scalars().all())

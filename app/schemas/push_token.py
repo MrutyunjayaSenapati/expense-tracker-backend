@@ -22,3 +22,10 @@ class PushTokenResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BroadcastNotificationRequest(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200, example="🎉 50% Off Today Only!")
+    body: str = Field(..., min_length=1, max_length=1000, example="Upgrade to Premium and get 50% discount.")
+    data: Optional[dict] = Field(None, example={"screen": "/(tabs)/settings", "promo": "HALF50"})
+

@@ -10,7 +10,12 @@ from app.schemas.notification import (
     NotificationListResponse,
     NotificationResponse,
 )
-from app.schemas.push_token import PushTokenRegister, PushTokenResponse, PushTokenUnregister
+from app.schemas.push_token import (
+    BroadcastNotificationRequest,
+    PushTokenRegister,
+    PushTokenResponse,
+    PushTokenUnregister,
+)
 from app.repositories.push_token_repository import PushTokenRepository
 from app.services.notification_service import NotificationService
 
@@ -77,6 +82,26 @@ async def unregister_push_token(
     repo = PushTokenRepository(db)
     await repo.deactivate_token(push_token=payload.push_token)
     await db.commit()
+
+
+@router.post(
+    "/broadcast",
+    status_code=status.HTTP_200_OK,
+    summary="Broadcast push notification to ALL active users",
+)
+async def broadcast_push_notification(
+    payload: BroadcastNotificationRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.services.push_notification_service import PushNotificationService
+    push_service = PushNotificationService(db)
+    success = await push_service.broadcast_to_all(
+        title=payload.title,
+        body=payload.body,
+        data=payload.data,
+    )
+    return {"status": "ok", "sent": success}
 
 
 @router.patch(

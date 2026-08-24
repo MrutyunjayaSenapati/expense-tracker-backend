@@ -73,6 +73,33 @@ class PushNotificationService:
 
         return await self._dispatch_to_expo(messages)
 
+    async def broadcast_to_all(
+        self,
+        title: str,
+        body: str,
+        data: Optional[Dict[str, Any]] = None,
+        sound: str = "default",
+    ) -> bool:
+        """Broadcast push notification to ALL active registered devices."""
+        tokens = await self.repo.get_all_active_tokens()
+        if not tokens:
+            logger.info("No active push tokens found for broadcast.")
+            return False
+
+        messages = []
+        for t in tokens:
+            msg: Dict[str, Any] = {
+                "to": t.push_token,
+                "title": title,
+                "body": body,
+                "sound": sound,
+            }
+            if data:
+                msg["data"] = data
+            messages.append(msg)
+
+        return await self._dispatch_to_expo(messages)
+
     async def _dispatch_to_expo(self, messages: List[Dict[str, Any]]) -> bool:
         if not messages:
             return False
